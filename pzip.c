@@ -70,10 +70,9 @@ int main (int argc, char *argv[]) {
 
 void *compress_file (void *slice) {
     int k = *((int *) slice);
-	int l;
+	int l = 0;
 	int perThread = stored_size/num_threads;
     int start_pos_calc, start_pos_total = (perThread * k);
-    int end_pos = (start_pos_total + (perThread - 1));
 
 	struct stored_data tempFile;
 
@@ -82,7 +81,7 @@ void *compress_file (void *slice) {
 		tempFile = addr_list[0];
 		start_pos_calc = 0;
 	} else {
-		for (l = 0; l < 25; l++){
+		for (l = 0; l < 24; l++){
 			//printf("------------> T:%dL%d, spt: %d, adl[%d]: %d\n", k, l, start_pos_total, l, addr_list[l].length);
 			if ((start_pos_total - addr_list[l].length) <= 0){
 				tempFile = addr_list[l];
@@ -93,48 +92,45 @@ void *compress_file (void *slice) {
 		}
 	}
 
+	printf("thread %d, start_oval: %d, start_pos_calc: %d, adl[%d]\n", k, (perThread * k), start_pos_calc, l);
+
 	if ((k + 1) == num_threads) // if stored_size % num_threads != 0, assign remaining info to last thread
-		end_pos = tempFile.length;
-    
-    printf("thread %d, start_oval: %d, start_pos_calc: %d, adl[%d]\n", k, (perThread * k), start_pos_calc, l);
+		perThread += 100000;
 
 	//add logic for compress
 	char buffer[100000];
 	char last = tempFile.pointer[start_pos_calc];
 	int count = 0;
+	start_pos_calc++;
 	while (perThread >= 0){
-		//printf("thread %d, loop %d, char %c ----> ", k, start_pos_calc, tempFile.pointer[start_pos_calc]);
+		printf("thread %d, loop %d, char %c ----> ", k, start_pos_calc, tempFile.pointer[start_pos_calc]);
 		if (start_pos_calc > tempFile.length){
-			//printf("reached eof, next file is adl[%d]\n", l);
+			printf("reached eof, next file is adl[%d]\n", l);
 			sprintf(buffer, "%s%d%c", buffer, count, last);
-			if ((k+1) == num_threads){
+			if (addr_list[l+1].length > 0){
 				tempFile = addr_list[l++]; 
-				start_pos_calc = 1;
+				start_pos_calc = 0;
 				last = tempFile.pointer[0];
-				count = 0;
+				count = 1;
 			} else { break; }
 		} if (perThread == 0){
-			//printf("thread %d done, break\n", k);
+			printf("thread %d done, break\n", k);
 			sprintf(buffer, "%s%d%c", buffer, count, last);
 			break;
 		} if (tempFile.pointer[start_pos_calc] == last){
-			//printf("incremented\n");
+			printf("incremented\n");
 			count++;
 		} if (tempFile.pointer[start_pos_calc] != last) {
-			//printf("printed %d%c\n", count, last);
+			printf("printed %d%c\n", count, last);
 			sprintf(buffer, "%s%d%c", buffer, count, last);
 			last = tempFile.pointer[start_pos_calc];
 			count = 1;
 		}
 		perThread--;
 		start_pos_calc++;
-		//another flag that im missing?
 	}
 
 	//USE FWRITE/FPUT TO WRITE TO BUFFER (OR WHATEVER)
-
-	//catch straggler
-	//if(k != num_threads) sprintf(buffer, "%s%d%c", buffer, count, last);
     
     while(1){ // wait for turn to update stored_zip
         if (controller == k){
@@ -143,7 +139,7 @@ void *compress_file (void *slice) {
             controller = k+1;
             break;
         }
-    } // gets stuck on the last thread check for loop exit condition
+    }
     
     return 0;
 }
