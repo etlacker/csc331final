@@ -23,15 +23,14 @@ struct stored_data addr_list[24];
 void *compress_file (void *slice);
 
 int main (int argc, char *argv[]) {
-    int i, j;
-    int *k;
+    int *k, i;
     pthread_t *threads;
 	char *stored_data;
 	struct stat sb;
 
     num_threads = atoi(argv[1]);
 
-	for (int i = 2; i < (argc); i++){
+	for (i = 2; i < (argc); i++){
 		int fd = open(argv[i], O_RDONLY, S_IRUSR | S_IWUSR);
 		fstat(fd, &sb);
 		stored_data = mmap(NULL, (sb.st_size), PROT_READ, MAP_SHARED, fd, 0);
@@ -70,8 +69,8 @@ int main (int argc, char *argv[]) {
 }
 
 void *compress_file (void *slice) {
-    int l, k = *((int *) slice);
-	int tempTotal = stored_size;
+    int k = *((int *) slice);
+	int l;
 	int perThread = stored_size/num_threads;
     int start_pos_calc, start_pos_total = (perThread * k);
     int end_pos = (start_pos_total + (perThread - 1));
@@ -103,15 +102,17 @@ void *compress_file (void *slice) {
 	char buffer[100000];
 	char last = tempFile.pointer[start_pos_calc];
 	int count = 0;
-	for (start_pos_calc; start_pos_calc <= end_pos; start_pos_calc++){
+	while (perThread >= 0){
 		//printf("thread %d, loop %d, char %c ----> ", k, start_pos_calc, tempFile.pointer[start_pos_calc]);
 		if (start_pos_calc > tempFile.length){
 			//printf("reached eof, next file is adl[%d]\n", l);
 			sprintf(buffer, "%s%d%c", buffer, count, last);
-			tempFile = addr_list[l+1]; //maybe right?
-			start_pos_calc = 1;
-			last = tempFile.pointer[0];
-			count = 0;
+			if ((k+1) == num_threads){
+				tempFile = addr_list[l++]; 
+				start_pos_calc = 1;
+				last = tempFile.pointer[0];
+				count = 0;
+			} else { break; }
 		} if (perThread == 0){
 			//printf("thread %d done, break\n", k);
 			sprintf(buffer, "%s%d%c", buffer, count, last);
@@ -126,13 +127,14 @@ void *compress_file (void *slice) {
 			count = 1;
 		}
 		perThread--;
+		start_pos_calc++;
 		//another flag that im missing?
 	}
 
 	//USE FWRITE/FPUT TO WRITE TO BUFFER (OR WHATEVER)
 
 	//catch straggler
-	if(k != num_threads) sprintf(buffer, "%s%d%c", buffer, count, last);
+	//if(k != num_threads) sprintf(buffer, "%s%d%c", buffer, count, last);
     
     while(1){ // wait for turn to update stored_zip
         if (controller == k){
