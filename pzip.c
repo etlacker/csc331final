@@ -112,7 +112,7 @@ void *compress_file (void *slice) {
 				tempFile = addr_list[l]; 
 				start_pos_calc = 1;
 				last = tempFile.pointer[0];
-				count = 0;
+				count = 1;
 				continue;
 			} else { printf("last thread no file\n\n"); break; }
 		} if (perThread == 0){
