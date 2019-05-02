@@ -14,6 +14,11 @@ struct stored_data{
 	int length;
 };
 
+struct stored_zipped{
+	int count;
+	char chara;
+};
+
 int num_threads;
 char stored_zip[30000000];
 int stored_size;
@@ -40,8 +45,6 @@ int main (int argc, char *argv[]) {
 		close(fd);
 	}
 
-	printf("stored_size = %d\n", stored_size);
-
     threads = (pthread_t *) malloc (num_threads * sizeof (pthread_t));
     
     for (i = 0; i < num_threads; i++) {
@@ -60,8 +63,9 @@ int main (int argc, char *argv[]) {
 	}
 
 	//unmap maps	
-    
-    fwrite(stored_zip, 1, sizeof(stored_zip), stdout);
+    int temp = 4;
+	int *b = &temp;
+    fwrite(b, 1, sizeof(int), stdout);
 	// fwrite(&count, sizeof(int), 1, stdout);
 	// fputc(last, stdout);
     
@@ -74,8 +78,11 @@ void *compress_file (void *slice) {
 	int perThread = stored_size/num_threads;
     int start_pos_calc, start_pos_total = (perThread * k);
 
-	struct stored_data tempFile;
+	struct stored_zipped zipped_list[perThread*2];
+	int zip_count = -1;
 
+	struct stored_data tempFile;
+	//printf("calc: %d, total: %d\n", start_pos_calc, start_pos_total);
 	// Calc file to use and starting position
 	if (k == 0) {
 		tempFile = addr_list[0];
@@ -92,21 +99,20 @@ void *compress_file (void *slice) {
 		}
 	}
 
-	printf("thread %d, start_oval: %d, start_pos_calc: %d, adl[%d]\n", k, (perThread * k), start_pos_calc, l);
+	//printf("thread %d, start_oval: %d, start_pos_calc: %d, adl[%d]\n", k, (perThread * k), start_pos_calc, l);
 
 	if ((k + 1) == num_threads) // if stored_size % num_threads != 0, assign remaining info to last thread
-		perThread += 100000;
+		perThread += 10000;
 
 	//add logic for compress
-	char buffer[100000];
+	//char buffer[100000];
 	char last = tempFile.pointer[start_pos_calc];
 	int count = 0;
 	//start_pos_calc++;
 	while (perThread >= 0){
-		printf("thread %d, loop %d, char %c ----> ", k, start_pos_calc, tempFile.pointer[start_pos_calc]);
+		//printf("thread %d, loop %d, char %c ----> ", k, start_pos_calc, tempFile.pointer[start_pos_calc]);
 		if (start_pos_calc > tempFile.length){
-			printf("reached eof, next file is adl[%d]: current \"%d%c\"\n", l+1, count, last);
-			//sprintf(buffer, "%s%d%c", buffer, count, last);
+			//printf("reached eof, next file is adl[%d]: current \"%d%c\"\n", l+1, count, last);
 			if (addr_list[l+1].length > 0){
 				l++;
 				tempFile = addr_list[l]; 
@@ -114,17 +120,23 @@ void *compress_file (void *slice) {
 				last = tempFile.pointer[0];
 				count = 1;
 				continue;
-			} else { printf("last thread no file\n\n"); break; }
+			} else { break; }
 		} if (perThread == 0){
-			printf("thread %d done, break. curr: '%d%c'\n", k, count, last);
-			sprintf(buffer, "%s%d%c", buffer, count, last);
+			//printf("thread %d done, break. curr: '%d%c'\n", k, count, last);
+			//sprintf(buffer, "%s%d%c", buffer, count, last);
+			zip_count++;
+			zipped_list[zip_count].count = count;
+			zipped_list[zip_count].chara = last;
 			break;
 		} if (tempFile.pointer[start_pos_calc] == last){
-			printf("incremented\n");
+			//printf("incremented\n");
 			count++;
 		} if (tempFile.pointer[start_pos_calc] != last) {
-			printf("printed %d%c\n", count, last);
-			sprintf(buffer, "%s%d%c", buffer, count, last);
+			//printf("printed %d%c\n", count, last);
+			//sprintf(buffer, "%s%d%c", buffer, count, last);
+			zip_count++;
+			zipped_list[zip_count].count = count;
+			zipped_list[zip_count].chara = last;
 			last = tempFile.pointer[start_pos_calc];
 			count = 1;
 		}
@@ -137,7 +149,13 @@ void *compress_file (void *slice) {
     while(1){ // wait for turn to update stored_zip
         if (controller == k){
             //printf("\n\nthread: %d, stored: %s, buffer: %s\n\n", k, stored_zip, buffer);
-			sprintf(stored_zip, "%s%s", stored_zip, buffer);
+			//sprintf(stored_zip, "%s%s", stored_zip, buffer);
+			int zip_print = 0;
+			while (zip_print <= zip_count){
+				fwrite(&zipped_list[zip_print].count, sizeof(int), 1, stdout);
+				fwrite(&zipped_list[zip_print].chara, sizeof(char), 1, stdout);
+				zip_print++;
+			}
             controller = k+1;
             break;
         }
