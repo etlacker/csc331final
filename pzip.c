@@ -101,20 +101,22 @@ void *compress_file (void *slice) {
 	char buffer[100000];
 	char last = tempFile.pointer[start_pos_calc];
 	int count = 0;
-	start_pos_calc++;
+	//start_pos_calc++;
 	while (perThread >= 0){
 		printf("thread %d, loop %d, char %c ----> ", k, start_pos_calc, tempFile.pointer[start_pos_calc]);
 		if (start_pos_calc > tempFile.length){
-			printf("reached eof, next file is adl[%d]\n", l);
-			sprintf(buffer, "%s%d%c", buffer, count, last);
+			printf("reached eof, next file is adl[%d]: current \"%d%c\"\n", l+1, count, last);
+			//sprintf(buffer, "%s%d%c", buffer, count, last);
 			if (addr_list[l+1].length > 0){
-				tempFile = addr_list[l++]; 
-				start_pos_calc = 0;
+				l++;
+				tempFile = addr_list[l]; 
+				start_pos_calc = 1;
 				last = tempFile.pointer[0];
-				count = 1;
-			} else { break; }
+				count = 0;
+				continue;
+			} else { printf("last thread no file\n\n"); break; }
 		} if (perThread == 0){
-			printf("thread %d done, break\n", k);
+			printf("thread %d done, break. curr: '%d%c'\n", k, count, last);
 			sprintf(buffer, "%s%d%c", buffer, count, last);
 			break;
 		} if (tempFile.pointer[start_pos_calc] == last){
