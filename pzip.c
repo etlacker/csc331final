@@ -55,7 +55,7 @@ int main (int argc, char *argv[]) {
             free (threads);
             exit (-1);
         }
-	printf("\ncreated thread %d\n\n", i);
+		printf("\ncreated thread %d\n\n", i);
     }
     
     // main thead waiting for other thread to complete
@@ -72,8 +72,9 @@ void *compress_file (void *slice) {
     int k = *((int *) slice);
 	printf("In thread %d, stored_size: %d, perThread: %d\n", k, stored_size, (stored_size/num_threads));
 	int l = 0;
-	int perThread = stored_size/num_threads;
-    int start_pos_calc, start_pos_total = (perThread * k);
+	int perThread = (stored_size/num_threads);
+    int start_pos_calc;
+	int start_pos_total = (perThread * k);
 
 	struct stored_zipped zipped_list[perThread*2];
 	int zip_count = -1;
@@ -94,7 +95,7 @@ void *compress_file (void *slice) {
 			} else { start_pos_total = start_pos_total - addr_list[l].length; }
 		}
 	}
-	
+
 	printf("calc: %d, total: %d\n", start_pos_calc, start_pos_total);
 
 	printf("thread %d, start_oval: %d, start_pos_calc: %d, adl[%d]\n", k, (perThread * k), start_pos_calc, l);
