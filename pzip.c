@@ -20,7 +20,6 @@ struct stored_zipped{
 };
 
 int num_threads;
-char stored_zip[30000000];
 int stored_size;
 int controller = 0;
 struct stored_data addr_list[24];
@@ -43,6 +42,7 @@ int main (int argc, char *argv[]) {
 		addr_list[i-2].length = sb.st_size;
 		stored_size += sb.st_size;
 		close(fd);
+		printf("\nloop %d\n\n", i);
 	}
 
     threads = (pthread_t *) malloc (num_threads * sizeof (pthread_t));
