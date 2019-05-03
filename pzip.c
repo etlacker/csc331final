@@ -77,7 +77,6 @@ void *compress_file (void *slice) {
 	int zip_count = -1;
 
 	struct stored_data tempFile;
-	printf("calc: %d, total: %d\n", start_pos_calc, start_pos_total);
 	// Calc file to use and starting position
 	if (k == 0) {
 		tempFile = addr_list[0];
@@ -93,6 +92,8 @@ void *compress_file (void *slice) {
 			} else { start_pos_total = start_pos_total - addr_list[l].length; }
 		}
 	}
+	
+	printf("calc: %d, total: %d\n", start_pos_calc, start_pos_total);
 
 	printf("thread %d, start_oval: %d, start_pos_calc: %d, adl[%d]\n", k, (perThread * k), start_pos_calc, l);
 
