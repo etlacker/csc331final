@@ -77,14 +77,14 @@ void *compress_file (void *slice) {
 	int zip_count = -1;
 
 	struct stored_data tempFile;
-	//printf("calc: %d, total: %d\n", start_pos_calc, start_pos_total);
+	printf("calc: %d, total: %d\n", start_pos_calc, start_pos_total);
 	// Calc file to use and starting position
 	if (k == 0) {
 		tempFile = addr_list[0];
 		start_pos_calc = 0;
 	} else {
 		for (l = 0; l < 24; l++){
-			//printf("------------> T:%dL%d, spt: %d, adl[%d]: %d\n", k, l, start_pos_total, l, addr_list[l].length);
+			printf("------------> T:%dL%d, spt: %d, adl[%d]: %d\n", k, l, start_pos_total, l, addr_list[l].length);
 			if ((start_pos_total - addr_list[l].length) <= 0){
 				tempFile = addr_list[l];
 				start_pos_total = start_pos_total - tempFile.length;
