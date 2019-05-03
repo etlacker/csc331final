@@ -76,7 +76,7 @@ void *compress_file (void *slice) {
 
 	struct stored_zipped zipped_list[perThread*2];
 	int zip_count = -1;
-
+	printf("\n k: %d, perThread: %d\n\n", k, perThread);
 	struct stored_data tempFile;
 	// Calc file to use and starting position
 	if (k == 0) {
