@@ -70,6 +70,7 @@ int main (int argc, char *argv[]) {
 
 void *compress_file (void *slice) {
     int k = *((int *) slice);
+	printf("In thread %d\n", k);
 	int l = 0;
 	int perThread = stored_size/num_threads;
     int start_pos_calc, start_pos_total = (perThread * k);
