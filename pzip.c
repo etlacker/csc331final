@@ -55,7 +55,7 @@ int main (int argc, char *argv[]) {
             free (threads);
             exit (-1);
         }
-	printf("\ncreated thread %d\n\n", 1);
+	printf("\ncreated thread %d\n\n", i);
     }
     
     // main thead waiting for other thread to complete
