@@ -94,7 +94,7 @@ void *compress_file (void *slice) {
 		}
 	}
 
-	//printf("thread %d, start_oval: %d, start_pos_calc: %d, adl[%d]\n", k, (perThread * k), start_pos_calc, l);
+	printf("thread %d, start_oval: %d, start_pos_calc: %d, adl[%d]\n", k, (perThread * k), start_pos_calc, l);
 
 	if ((k + 1) == num_threads) // if stored_size % num_threads != 0, assign remaining info to last thread
 		perThread += 10000;
