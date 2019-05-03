@@ -63,11 +63,6 @@ int main (int argc, char *argv[]) {
 	}
 
 	//unmap maps	
-    int temp = 4;
-	int *b = &temp;
-    fwrite(b, 1, sizeof(int), stdout);
-	// fwrite(&count, sizeof(int), 1, stdout);
-	// fputc(last, stdout);
     
     return 0;
 }
@@ -144,7 +139,7 @@ void *compress_file (void *slice) {
 		start_pos_calc++;
 	}
 
-	//USE FWRITE/FPUT TO WRITE TO BUFFER (OR WHATEVER)
+	//mutex lock???
     
     while(1){ // wait for turn to update stored_zip
         if (controller == k){
@@ -152,8 +147,8 @@ void *compress_file (void *slice) {
 			//sprintf(stored_zip, "%s%s", stored_zip, buffer);
 			int zip_print = 0;
 			while (zip_print <= zip_count){
-				fwrite(&zipped_list[zip_print].count, sizeof(int), 1, stdout);
-				fwrite(&zipped_list[zip_print].chara, sizeof(char), 1, stdout);
+				fwrite(&zipped_list[zip_print].count, 4, 1, stdout);
+				fwrite(&zipped_list[zip_print].chara, 1, 1, stdout);
 				zip_print++;
 			}
             controller = k+1;
