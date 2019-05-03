@@ -75,8 +75,9 @@ void *compress_file (void *slice) {
 	int perThread = (stored_size/num_threads);
     int start_pos_calc;
 	int start_pos_total = (perThread * k);
-
+	printf("\n\na%d", k);
 	struct stored_zipped zipped_list[perThread*2];
+	printf("::%db\n", k);
 	int zip_count = -1;
 	printf("\n k: %d, perThread: %d\n\n", k, perThread);
 	struct stored_data tempFile;
